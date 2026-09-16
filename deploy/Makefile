@@ -60,17 +60,18 @@ KERRNYX_SF_BIN = $(REPO_ROOT)/cpp_reference/test/test_security_floor_golden
 KERRNYX_DOGE_SUPPORT = $(DOGECOIN_DIR)/src/uint256.cpp \
                         $(DOGECOIN_DIR)/src/utilstrencodings.cpp
 
-.PHONY: help cpp-test cpp-compile-check detect-env clone-dogecoin inject-hooks production-build production-build-debug m3-integration regtest-test
+.PHONY: help cpp-test cpp-compile-check detect-env clone-dogecoin inject-hooks production-build production-build-debug d0-control-build m3-integration regtest-test
 
 help:
 	@echo "Litenyx targets:"
-	@echo "  cpp-test        Build + run standalone consensus unit tests (boost header-only)"
-	@echo "  clone-dogecoin  Clone Dogecoin base into external/dogecoin (gitignored)"
-	@echo "  inject-hooks    Copy litenyx/ sources + apply patches into the clone"
-	@echo "  production-build Configure + build dogecoind/dogecoin-cli/dogecoin-tx"
+	@echo "  cpp-test            Build + run standalone consensus unit tests (boost header-only)"
+	@echo "  clone-dogecoin      Clone Dogecoin base into external/dogecoin (gitignored)"
+	@echo "  inject-hooks        Copy litenyx/ sources + apply patches into the clone"
+	@echo "  production-build    Configure + build dogecoind/dogecoin-cli/dogecoin-tx (LITENYX)"
 	@echo "  production-build-debug  DEBUG-only build (--enable-debug, NO -DNDEBUG); fault-injection capable"
-	@echo "  m3-integration  FAIL-CLOSED INT-OPEN-1 gate: pin->patch->debug build->delta KATs->G1-G3 regtest"
-	@echo "  detect-env      Print toolchain include/lib paths"
+	@echo "  d0-control-build    Build PRISTINE Dogecoin v1.14.9 (NO Litenyx hooks; D0 control)"
+	@echo "  m3-integration      FAIL-CLOSED INT-OPEN-1 gate: pin->patch->debug build->delta KATs->G1-G3 regtest"
+	@echo "  detect-env          Print toolchain include/lib paths"
 
 clone-dogecoin:
 	@if [ -d "$(DOGECOIN_DIR)/.git" ]; then \
@@ -143,6 +144,27 @@ production-build-debug: inject-hooks
 	@echo "Building debug daemon (this is slow)..."
 	@cd $(DOGECOIN_DIR) && $(MAKE)
 	@echo "Debug build complete: $(DOGECOIN_DIR)/src/dogecoind (fault-injection capable)"
+
+# D0-CONTROL-BUILD: pristine Dogecoin v1.14.9 build (NO Litenyx hooks)
+# This target builds the pristine Dogecoin control daemon for the Dogecoin-first
+# control experiment. It depends ONLY on clone-dogecoin (NOT inject-hooks), so
+# the Dogecoin source remains at the exact INT-Q5 pin (e0a1c157...) with zero
+# Litenyx modifications. The resulting dogecoind/dogecoin-cli/dogecoin-tx are
+# the pristine Dogecoin control executables for Control A.
+#
+# This target is the D0 NO-HOOKS SEAM authorized for the Dogecoin control.
+# It MUST NOT depend on inject-hooks and MUST NOT apply any Litenyx patches.
+d0-control-build: clone-dogecoin
+	@echo "=== D0 CONTROL BUILD: pristine Dogecoin v1.14.9 (NO hooks) ==="
+	@test "$(shell git -C $(DOGECOIN_DIR) rev-parse HEAD)" = "$(DOGECOIN_PIN)" || \
+		{ echo "FATAL: Dogecoin HEAD != pinned $(DOGECOIN_PIN) (got $$(git -C $(DOGECOIN_DIR) rev-parse HEAD))"; exit 1; }
+	@echo "Verified Dogecoin base at: $$(git -C $(DOGECOIN_DIR) rev-parse HEAD) (expect $(DOGECOIN_PIN))"
+	@echo "Configuring PRISTINE build (no Litenyx hooks)..."
+	@cd $(DOGECOIN_DIR) && ./autogen.sh && ./configure --with-incompatible-bdb --with-boost-process --with-boost-libdir=/usr/lib/x86_64-linux-gnu
+	@echo "Building pristine Dogecoin daemon (this is slow)..."
+	@cd $(DOGECOIN_DIR) && $(MAKE)
+	@echo "D0 CONTROL BUILD COMPLETE: pristine dogecoind/dogecoin-cli/dogecoin-tx in $(DOGECOIN_DIR)/src"
+	@echo "D0 binary identity: $$(sha256sum $(DOGECOIN_DIR)/src/dogecoind | cut -d' ' -f1)"
 
 # INT-OPEN-1 / M3: fail-closed integration gate. Enforces the evidence hierarchy:
 #   Pinned v1.14.9 -> Patch Application -> Debug Daemon Build ->
