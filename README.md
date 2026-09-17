@@ -108,3 +108,11 @@ If implementation requires unresolved consensus semantics:
 - `Litenyx-oracle` — provenance, reconciliation, evidence mapping, discrepancy analysis
 
 Historical white papers and superseded experiments remain useful provenance, not automatic current authority.
+
+## Workspace state (2026-09-17)
+
+- Branch/HEAD: `main` @ `5b02005` (superseded to canonical remote tip; local doc-only commit applied on top)
+- Origin: `https://github.com/LITENYX/Litenyx-Fork.git` (canonical; simulation/CI/build clone — origin updated from `suniltnngl-gm/litenyx.git` 2026-09-17)
+- Nested (embedded) git repo inside `litenyx-workspace`; unregistered (no `.gitmodules`/gitlink) — the parent tracks this directory as untracked
+- Agent instructions: `AGENTS.md` (renamed from `AGENT.md` 2026-09-17; no CI/config pins to the old name)
+- Pre-existing pending edit preserved: `deploy/Makefile` (restored byte-exact from `Temp\opencode\litenyx-restructure\`)
