@@ -76,11 +76,3 @@ Litenyx is derived from [Dogecoin Core](https://github.com/dogecoin/dogecoin),
 which is derived from Bitcoin Core. See `COPYING` for the upstream license.
 
 Additional Litenyx contributions are distributed under the same terms.
-
-## Workspace state (2026-09-17)
-
-- Branch/HEAD: `phase7-draining-authority` @ `0c6b480`
-- Origin: `https://github.com/suniltnngl-gm/litenyx.git` (personal mirror; LITENYX-org counterpart is `Litenyx-Fork`)
-- Nested (embedded) git repo inside `litenyx-workspace`; unregistered (no `.gitmodules`/gitlink) — the parent tracks this directory as untracked
-- Agent instructions: `AGENTS.md` (renamed from `AGENT.md` 2026-09-17; no CI/config pins to the old name)
-- Promotion note: remote same-branch tip must be re-fetched to confirm fast-forward before push
