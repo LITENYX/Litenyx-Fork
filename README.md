@@ -108,3 +108,11 @@ If implementation requires unresolved consensus semantics:
 - `Litenyx-oracle` — provenance, reconciliation, evidence mapping, discrepancy analysis
 
 Historical white papers and superseded experiments remain useful provenance, not automatic current authority.
+
+## Workspace state (2026-09-17)
+
+- Branch/HEAD: `gate-t-testnet-activation` @ `bf596f82` (in sync with remote branch; remote default `main` = `5b02005`)
+- Origin: `https://github.com/LITENYX/Litenyx-Fork.git`
+- Tracked: 156 files; working tree CLEAN at scan time
+- Agent instructions: `AGENTS.md` (renamed from `AGENT.md` 2026-09-17; rename verified against CI/CODEOWNERS/config references — none exist)
+- Notable surfaces: pinned D0 control at `deploy/external/dogecoin`; TU matrices (`test_tu_matrix.json`, `s1_test_tu_matrix.json`); build evidence (`BUILD_SET_V1`, `BUILD_EVIDENCE_CANON_1.md`)

@@ -1,4 +1,4 @@
-# AGENT.md — litenyx (Implementation)
+# AGENTS.md — litenyx (Implementation)
 
 ## Repository role
 
