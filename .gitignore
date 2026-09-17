@@ -92,4 +92,20 @@ id_rsa*
 
 # Databases / SQLite
 *.sqlite
-*.sqlite3  
+*.sqlite3
+
+# Transient / editor-scratch files
+*.ps1~
+*.psm1~
+*.psd1~
+*.py~
+*.js~
+*.ts~
+~$*
+#*#
+.#*
+._*
+.localized
+.nfs*
+nohup.out
+Desktop.ini  
