@@ -28,6 +28,7 @@ KerrNyx-build-diag
 # Python caches and build artifacts
 __pycache__/
 *.pyc
+*.pyo
 
 # Internal documentation — not published to GitHub
 # Sole tracked exception: docs/CURRENT_AUTHORITY.md (public authority notice; referenced by AGENT.md and MSF records)
@@ -38,3 +39,73 @@ deploy/docs/
 
 "*.compile.err"  
 "*.compile.out"  
+
+# Node / virtualenv vendor
+node_modules/
+.venv/
+venv/
+.eggs/
+*.egg-info/
+
+# Python linters / type checkers / coverage
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+coverage.xml
+htmlcov/
+
+# Build output (secondary)
+dist/
+target/
+*.pdb
+*.ilk
+*.exp
+*.pch
+*.gch
+*.gcno
+*.gcda
+CMakeFiles/
+cmake-build-*/
+
+# Editor / OS (extended)
+Thumbs.db
+.vscode/
+.idea/
+.fleet/
+.directory
+*.swo
+*~
+*.orig
+*.rej
+*.pid
+
+# Secrets / credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+
+# Databases / SQLite
+*.sqlite
+*.sqlite3
+
+# Transient / editor-scratch files
+*.ps1~
+*.psm1~
+*.psd1~
+*.py~
+*.js~
+*.ts~
+~$*
+#*#
+.#*
+._*
+.localized
+.nfs*
+nohup.out
+Desktop.ini  
