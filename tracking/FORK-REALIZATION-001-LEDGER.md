@@ -53,4 +53,19 @@ independently verified fork behavior.
 
 ## F2 — Reproducible daemon build — ACTIVE
 
-Entries created as each step is entered, following the workflow in the contract.
+| Axis              | Record                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| **Frontier**      | F2                                                                                          |
+| **Objective**     | Demonstrate the daemon builds reproducibly on both Windows (MSYS2 ucrt64) and Linux (ubuntu:20.04 container) from the same pinned source, with recorded toolchain specs and binary hashes. |
+| **Scope**         | `deploy/Makefile` (platform-aware), pinned Dogecoin `e0a1c157`, Litenyx patches (6), pinned Boost/OpenSSL/libevent/BDB on each platform, `tracking/` docs. |
+| **Pre-state**     | [OBSERVED] F1 VERIFIED. Daemon builds on both platforms. Windows toolchain: ucrt64 g++ 16.1.0, Boost 1.91.0, OpenSSL 3.6.3, libevent 2.1.12, BDB 18.x, binutils 2.46. Linux CI toolchain: ubuntu:20.04, g++-10, Boost 1.71, OpenSSL 1.1.1f, libevent 2.1.11, BDB 18.x. |
+| **Gap**           | Toolchain divergence: Boost 1.91 (Windows) vs 1.71 (Linux CI). Windows test suite link fails (missing bcrypt, Boost test exports). |
+| **Action**        | [OBSERVED] Clean rebuild on Windows: daemon + CLI + TX build and run. Binary hashes captured. Linux CI: build passes (Litenyx CI 36145158247). |
+| **Evidence**      | Windows clean rebuild (25-09 20:14): `dogecoind.exe` sha256 `9f2a1a064f05e13eaeb5b8012db1a8a90d8e98cf269e4fa9a8b96ddfa39975ed` (230,272,315 B); `dogecoin-cli.exe` `bfbf49da8d7ec527b76a2cb8fdc33639becc3ea542f4b0f01d3a0c6c900adb15` (22,891,085 B); `dogecoin-tx.exe` `0dcbd7c702654a7e6069679d73db827c7fc91e27c7e205fccf54aabca01fb0ce` (36,288,275 B). Daemon runs: `Dogecoin Core Daemon version v1.14.9.0-e0a1c1577-dirty`. Linux CI: build + KATs + regtest + M3 all SUCCESS (runs 36145158247, 36145158272, 36145158218). |
+| **Observed state**| Daemon binary builds and executes on both toolchains. Windows test suite link fails (bcrypt, Boost test exports) — not blocking daemon artifact. |
+| **Verification**  | [OBSERVED] Windows daemon runs, version prints Litenyx patches (`-dirty`). Linux CI green on full acceptance chain. Binary hashes recorded. |
+| **Defects**       | [D1] Toolchain divergence: Boost 1.91 vs 1.71 — recorded, not yet reconciled. [D2] Windows test suite link fails (missing bcrypt, Boost test exports) — daemon builds, test suite secondary. [D3] No deterministic/reproducible build verification yet (single build per platform, no double-build comparison). |
+| **Decision**      | [OBSERVED] F2 ACTIVE. Next: deterministic rebuild verification (double-build on each platform), or proceed to F3 (network identity) with toolchain divergence noted. |
+| **Commit**        | `6f43caf` (ledger) on `fork-realization-001-f1-build`. |
+| **Remote state**  | PR #10 open; CI green on core gates. |
+| **Next frontier state** | F2 ACTIVE; F3 READY. |
