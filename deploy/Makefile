@@ -119,7 +119,13 @@ inject-hooks: clone-dogecoin
 
 production-build: inject-hooks
 	@echo "Configuring build toolchains..."
-	@cd $(DOGECOIN_DIR) && ./autogen.sh && ./configure --with-incompatible-bdb --with-boost-process --with-boost-libdir=/usr/lib/x86_64-linux-gnu
+	@cd $(DOGECOIN_DIR) && ./autogen.sh && \
+		case "$$(uname -s)" in \
+			MINGW*|MSYS*) \
+				./configure --enable-c++17 --host=x86_64-w64-mingw32 --with-incompatible-bdb --with-boost-process --with-boost-libdir=/ucrt64/lib ;; \
+			*) \
+				./configure --with-incompatible-bdb --with-boost-process --with-boost-libdir=/usr/lib/x86_64-linux-gnu ;; \
+		esac
 	@echo "Building (this is slow)..."
 	@cd $(DOGECOIN_DIR) && $(MAKE)
 	@echo "Build complete: dogecoind/dogecoin-cli/dogecoin-tx in $(DOGECOIN_DIR)/src"
@@ -135,7 +141,13 @@ production-build-debug: inject-hooks
 	@test "$(shell git -C $(DOGECOIN_DIR) rev-parse HEAD)" = "$(DOGECOIN_PIN)" || \
 		{ echo "FATAL: Dogecoin HEAD != pinned $(DOGECOIN_PIN) (got $$(git -C $(DOGECOIN_DIR) rev-parse HEAD))"; exit 1; }
 	@echo "Configuring DEBUG build (--enable-debug, NO -DNDEBUG)..."
-	@cd $(DOGECOIN_DIR) && ./autogen.sh && ./configure --enable-debug --with-incompatible-bdb --with-boost-process --with-boost-libdir=/usr/lib/x86_64-linux-gnu
+	@cd $(DOGECOIN_DIR) && ./autogen.sh && \
+		case "$$(uname -s)" in \
+			MINGW*|MSYS*) \
+				./configure --enable-debug --enable-c++17 --host=x86_64-w64-mingw32 --with-incompatible-bdb --with-boost-process --with-boost-libdir=/ucrt64/lib ;; \
+			*) \
+				./configure --enable-debug --with-incompatible-bdb --with-boost-process --with-boost-libdir=/usr/lib/x86_64-linux-gnu ;; \
+		esac
 	@echo "Asserting debug build excludes -DNDEBUG..."
 	@grep -rq -- "-DNDEBUG" $(DOGECOIN_DIR)/Makefile $(DOGECOIN_DIR)/src/Makefile 2>/dev/null && \
 		{ echo "FATAL: configured build defines NDEBUG; G1 fault-injection would be excluded. Refusing."; exit 1; } || echo "OK: NDEBUG absent -> fault-injection capable daemon."
