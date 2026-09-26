@@ -390,6 +390,30 @@ regtest-test:
 	@cd $(REPO_ROOT)/tests/regtest && \
 		python3 -m pytest test_litenyx_splitmerge.py -v
 
+# SSS Rehydration Gate (cold-restart spent-set rehydration via REPLAY).
+# Requires debug daemon build (litenyx-rehydrate.patch wires rehydration into AppInitMain).
+sss-rehydration-test: production-build-debug
+	@echo "=== SSS REHYDRATION GATE (cold-restart rehydration) ==="
+	@cd $(REPO_ROOT)/tests/regtest && \
+		LITENYXD_BIN=$(DOGECOIN_DIR)/src/dogecoind \
+		LITENYX_CLI_BIN=$(DOGECOIN_DIR)/src/dogecoin-cli \
+		python3 -m pytest test_litenyx_cold_restart.py -v -p no:cacheprovider \
+			--tb=short -rA > /tmp/sss_rehydration_report.txt 2>&1; \
+		status=$$? ; \
+		cat /tmp/sss_rehydration_report.txt ; \
+		if [ $$status -ne 0 ]; then \
+			echo "=== DAEMON STDERR DUMPS ===" ; \
+			for f in /tmp/Litenyx-SSS-*/dogecoind.stderr.log ; do \
+				if [ -f "$$f" ]; then echo "--- $$f ---"; cat "$$f"; fi ; \
+			done ; \
+			echo "=== END DAEMON STDERR DUMPS ===" ; \
+			echo "FATAL: SSS rehydration suite failed (rc=$$status)"; exit 1; \
+		fi ; \
+		if grep -qiE "skipped|[0-9]+ skipped" /tmp/sss_rehydration_report.txt; then \
+			echo "FATAL: SSS rehydration suite reports SKIPPED tests; a skipped R1/R2 is NOT success."; exit 1; \
+		fi ; \
+		echo "OK: SSS rehydration suite passed (no skips, no failures)."
+
 # Alias to run both standalone cpp tests and the regtest harness.
 test-all: cpp-test regtest-test
 
