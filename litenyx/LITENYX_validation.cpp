@@ -132,9 +132,13 @@ bool LitenyxRehydrateSharedSpendSet(const Consensus::Params& consensus)
 
     const CChain& chain = ::chainActive;
     const int nTipHeight = chain.Height();
-    fprintf(stderr, "LITENYX REHYDRATION: starting rehydration, nTipHeight=%d\n", nTipHeight); fflush(stderr);
+    FILE* dbg = fopen("/tmp/rehydration_debug.log", "a");
+    if (dbg) {
+        fprintf(dbg, "LITENYX REHYDRATION: starting rehydration, nTipHeight=%d\n", nTipHeight);
+        fflush(dbg);
+    }
     if (nTipHeight < 0) {
-        fprintf(stderr, "LITENYX REHYDRATION: no chain (nTipHeight < 0), returning true\n"); fflush(stderr);
+        if (dbg) { fprintf(dbg, "LITENYX REHYDRATION: no chain (nTipHeight < 0), returning true\n"); fflush(dbg); fclose(dbg); }
         return true; // no chain (cannot happen at phase-7, but be safe)
     }
 
@@ -143,12 +147,14 @@ bool LitenyxRehydrateSharedSpendSet(const Consensus::Params& consensus)
     for (int h = 0; h <= nTipHeight; ++h) {
         const CBlockIndex* pindex = chain[h];
         if (pindex == nullptr) {
-            fprintf(stderr, "LITENYX REHYDRATION: chain[%d] is null, returning false\n", h); fflush(stderr);
+            if (dbg) { fprintf(dbg, "LITENYX REHYDRATION: chain[%d] is null, returning false\n", h); fflush(dbg); }
+            if (dbg) fclose(dbg);
             return false; // invariant violation: active chain gap is unrecoverable
         }
         CBlock block;
         if (!ReadBlockFromDisk(block, pindex, consensus)) {
-            fprintf(stderr, "LITENYX REHYDRATION: ReadBlockFromDisk failed at height %d, returning false\n", h); fflush(stderr);
+            if (dbg) { fprintf(dbg, "LITENYX REHYDRATION: ReadBlockFromDisk failed at height %d, returning false\n", h); fflush(dbg); }
+            if (dbg) fclose(dbg);
             // Missing/pruned required block body => cannot reconstruct
             // authoritatively => fail closed (contract §"missing bodies").
             return false;
@@ -163,10 +169,11 @@ bool LitenyxRehydrateSharedSpendSet(const Consensus::Params& consensus)
             }
         }
         if (nSpendsInBlock > 0) {
-            fprintf(stderr, "LITENYX REHYDRATION: height=%d, chainId=%d, recorded %d spends\n", h, nChainId, nSpendsInBlock); fflush(stderr);
+            if (dbg) { fprintf(dbg, "LITENYX REHYDRATION: height=%d, chainId=%d, recorded %d spends\n", h, nChainId, nSpendsInBlock); fflush(dbg); }
         }
     }
-    fprintf(stderr, "LITENYX REHYDRATION: completed successfully, nTipHeight=%d\n", nTipHeight); fflush(stderr);
+    if (dbg) { fprintf(dbg, "LITENYX REHYDRATION: completed successfully, nTipHeight=%d\n", nTipHeight); fflush(dbg); }
+    if (dbg) fclose(dbg);
     return true;
 }
 
