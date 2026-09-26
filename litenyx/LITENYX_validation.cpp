@@ -132,9 +132,9 @@ bool LitenyxRehydrateSharedSpendSet(const Consensus::Params& consensus)
 
     const CChain& chain = ::chainActive;
     const int nTipHeight = chain.Height();
-    LogPrintf("LITENYX REHYDRATION: starting rehydration, nTipHeight=%d\n", nTipHeight);
+    fprintf(stderr, "LITENYX REHYDRATION: starting rehydration, nTipHeight=%d\n", nTipHeight);
     if (nTipHeight < 0) {
-        LogPrintf("LITENYX REHYDRATION: no chain (nTipHeight < 0), returning true\n");
+        fprintf(stderr, "LITENYX REHYDRATION: no chain (nTipHeight < 0), returning true\n");
         return true; // no chain (cannot happen at phase-7, but be safe)
     }
 
@@ -143,12 +143,12 @@ bool LitenyxRehydrateSharedSpendSet(const Consensus::Params& consensus)
     for (int h = 0; h <= nTipHeight; ++h) {
         const CBlockIndex* pindex = chain[h];
         if (pindex == nullptr) {
-            LogPrintf("LITENYX REHYDRATION: chain[%d] is null, returning false\n", h);
+            fprintf(stderr, "LITENYX REHYDRATION: chain[%d] is null, returning false\n", h);
             return false; // invariant violation: active chain gap is unrecoverable
         }
         CBlock block;
         if (!ReadBlockFromDisk(block, pindex, consensus)) {
-            LogPrintf("LITENYX REHYDRATION: ReadBlockFromDisk failed at height %d, returning false\n", h);
+            fprintf(stderr, "LITENYX REHYDRATION: ReadBlockFromDisk failed at height %d, returning false\n", h);
             // Missing/pruned required block body => cannot reconstruct
             // authoritatively => fail closed (contract §"missing bodies").
             return false;
@@ -163,10 +163,10 @@ bool LitenyxRehydrateSharedSpendSet(const Consensus::Params& consensus)
             }
         }
         if (nSpendsInBlock > 0) {
-            LogPrintf("LITENYX REHYDRATION: height=%d, chainId=%d, recorded %d spends\n", h, nChainId, nSpendsInBlock);
+            fprintf(stderr, "LITENYX REHYDRATION: height=%d, chainId=%d, recorded %d spends\n", h, nChainId, nSpendsInBlock);
         }
     }
-    LogPrintf("LITENYX REHYDRATION: completed successfully, nTipHeight=%d\n", nTipHeight);
+    fprintf(stderr, "LITENYX REHYDRATION: completed successfully, nTipHeight=%d\n", nTipHeight);
     return true;
 }
 
