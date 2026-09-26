@@ -407,7 +407,7 @@ sss-rehydration-test: production-build-debug
 				if [ -f "$$f" ]; then echo "--- $$f ---"; cat "$$f"; fi ; \
 			done ; \
 			echo "=== REHYDRATION DEBUG LOG ===" ; \
-			if [ -f /__w/Litenyx-Fork/Litenyx-Fork/rehydration_debug.log ]; then cat /__w/Litenyx-Fork/Litenyx-Fork/rehydration_debug.log; else echo "(no rehydration debug log found)"; fi ; \
+			if [ -f ../rehydration_debug.log ]; then cat ../rehydration_debug.log; else echo "(no rehydration debug log found)"; fi ; \
 			echo "=== END DAEMON STDERR DUMPS ===" ; \
 			echo "FATAL: SSS rehydration suite failed (rc=$$status)"; exit 1; \
 		fi ; \
