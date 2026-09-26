@@ -132,7 +132,7 @@ bool LitenyxRehydrateSharedSpendSet(const Consensus::Params& consensus)
 
     const CChain& chain = ::chainActive;
     const int nTipHeight = chain.Height();
-    FILE* dbg = fopen("/__w/Litenyx-Fork/Litenyx-Fork/tmp/rehydration_debug.log", "a");
+    FILE* dbg = fopen("/__w/Litenyx-Fork/Litenyx-Fork/rehydration_debug.log", "a");
     if (dbg) {
         fprintf(dbg, "LITENYX REHYDRATION: starting rehydration, nTipHeight=%d\n", nTipHeight);
         fflush(dbg);
