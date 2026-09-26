@@ -169,8 +169,6 @@ bool LitenyxRehydrateSharedSpendSet(const Consensus::Params& consensus)
     LogPrintf("LITENYX REHYDRATION: completed successfully, nTipHeight=%d\n", nTipHeight);
     return true;
 }
-    return true;
-}
 
 // ---- Phase 4B(4): topology-commitment enforcement (spec §5.7/§9) -----------
 
