@@ -406,6 +406,8 @@ sss-rehydration-test: production-build-debug
 			for f in /tmp/Litenyx-SSS-*/dogecoind.stderr.log ; do \
 				if [ -f "$$f" ]; then echo "--- $$f ---"; cat "$$f"; fi ; \
 			done ; \
+			echo "=== REHYDRATION DEBUG LOG ===" ; \
+			if [ -f /tmp/rehydration_debug.log ]; then cat /tmp/rehydration_debug.log; else echo "(no rehydration debug log found)"; fi ; \
 			echo "=== END DAEMON STDERR DUMPS ===" ; \
 			echo "FATAL: SSS rehydration suite failed (rc=$$status)"; exit 1; \
 		fi ; \
