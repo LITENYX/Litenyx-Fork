@@ -132,7 +132,13 @@ bool LitenyxRehydrateSharedSpendSet(const Consensus::Params& consensus)
 
     const CChain& chain = ::chainActive;
     const int nTipHeight = chain.Height();
+    FILE* dbg = fopen("/__w/Litenyx-Fork/Litenyx-Fork/rehydration_debug.log", "a");
+    if (dbg) {
+        fprintf(dbg, "LITENYX REHYDRATION: starting rehydration, nTipHeight=%d\n", nTipHeight);
+        fflush(dbg);
+    }
     if (nTipHeight < 0) {
+        if (dbg) { fprintf(dbg, "LITENYX REHYDRATION: no chain (nTipHeight < 0), returning true\n"); fflush(dbg); fclose(dbg); }
         return true; // no chain (cannot happen at phase-7, but be safe)
     }
 
@@ -141,22 +147,33 @@ bool LitenyxRehydrateSharedSpendSet(const Consensus::Params& consensus)
     for (int h = 0; h <= nTipHeight; ++h) {
         const CBlockIndex* pindex = chain[h];
         if (pindex == nullptr) {
+            if (dbg) { fprintf(dbg, "LITENYX REHYDRATION: chain[%d] is null, returning false\n", h); fflush(dbg); }
+            if (dbg) fclose(dbg);
             return false; // invariant violation: active chain gap is unrecoverable
         }
         CBlock block;
         if (!ReadBlockFromDisk(block, pindex, consensus)) {
+            if (dbg) { fprintf(dbg, "LITENYX REHYDRATION: ReadBlockFromDisk failed at height %d, returning false\n", h); fflush(dbg); }
+            if (dbg) fclose(dbg);
             // Missing/pruned required block body => cannot reconstruct
             // authoritatively => fail closed (contract §"missing bodies").
             return false;
         }
         const uint8_t nChainId = block.nyx_aux.chainId;
+        int nSpendsInBlock = 0;
         for (const CTransactionRef& tx : block.vtx) {
             if (tx->IsCoinBase()) continue;
             for (const CTxIn& txin : tx->vin) {
                 LitenyxRecordSharedSpend(txin.prevout.hash, txin.prevout.n, nChainId);
+                nSpendsInBlock++;
             }
         }
+        if (nSpendsInBlock > 0) {
+            if (dbg) { fprintf(dbg, "LITENYX REHYDRATION: height=%d, chainId=%d, recorded %d spends\n", h, nChainId, nSpendsInBlock); fflush(dbg); }
+        }
     }
+    if (dbg) { fprintf(dbg, "LITENYX REHYDRATION: completed successfully, nTipHeight=%d\n", nTipHeight); fflush(dbg); }
+    if (dbg) fclose(dbg);
     return true;
 }
 
