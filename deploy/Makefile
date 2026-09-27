@@ -66,7 +66,7 @@ KERRNYX_SF_BIN = $(REPO_ROOT)/cpp_reference/test/test_security_floor_golden
 KERRNYX_DOGE_SUPPORT = $(DOGECOIN_DIR)/src/uint256.cpp \
                         $(DOGECOIN_DIR)/src/utilstrencodings.cpp
 
-.PHONY: help cpp-test cpp-compile-check detect-env clone-dogecoin inject-hooks production-build production-build-debug m3-integration regtest-test
+.PHONY: help cpp-test cpp-compile-check detect-env clone-dogecoin inject-hooks production-build production-build-debug m3-integration regtest-test sss-rehydration-test
 
 help:
 	@echo "Litenyx targets:"
@@ -109,7 +109,7 @@ inject-hooks: clone-dogecoin
 	@cp $(REPO_ROOT)/litenyx/LITENYX_topology_tracker.h $(DOGECOIN_DIR)/src/litenyx/LITENYX_topology_tracker.h
 	@cp $(REPO_ROOT)/litenyx/LITENYX_topology_tracker.cpp $(DOGECOIN_DIR)/src/litenyx/LITENYX_topology_tracker.cpp
 	@echo "Applying litenyx patches (mandatory: any failure is fatal)..."
-	@for p in identity block-aux validation rpc makefile; do \
+	@for p in identity block-aux validation rehydrate rpc makefile; do \
 		PATCH=$(REPO_ROOT)/deploy/patches/litenyx-$$p.patch; \
 		if git -C $(DOGECOIN_DIR) apply --check $$PATCH >/dev/null 2>&1; then \
 			git -C $(DOGECOIN_DIR) apply $$PATCH \
@@ -122,6 +122,12 @@ inject-hooks: clone-dogecoin
 		fi; \
 	done
 	@echo "Litenyx hooks injected."
+	@echo "Verifying rehydration hook installed..."
+	@grep -qs "LitenyxRehydrateSharedSpendSet" $(DOGECOIN_DIR)/src/init.cpp \
+		|| { echo "FATAL: AppInitMain rehydration hook missing in init.cpp"; exit 1; }
+	@grep -qs "LitenyxRehydrateSharedSpendSet" $(DOGECOIN_DIR)/src/litenyx/LITENYX_validation.h \
+		|| { echo "FATAL: rehydration declaration missing in LITENYX_validation.h"; exit 1; }
+	@echo "Rehydration hook verified."
 
 production-build: inject-hooks
 	@echo "Configuring build toolchains..."
